@@ -108,3 +108,6 @@ typings/
 # production
 /dist
 /doc-dist
+
+# 所有模块下的node_modules
+**/**/node_modules/

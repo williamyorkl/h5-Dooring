@@ -18,9 +18,11 @@ interface PointDataItem {
 }
 
 const PreviewPage = memo((props: PreviewPageProps) => {
+  // NOTE - 2. 这里操作pointData
   const [pointData, setPointData] = useState(() => {
     const pointDataStr =
-      decodeURI(getQueryString('pointData') ?? '') ?? localStorage.getItem('pointData');
+      decodeURI(getQueryString('pointData') ?? '') ?? localStorage.getItem('pointData'); // NOTE - 2.1 从两个地方获取，a、url的字符；b、localStorage中
+
     let points;
 
     try {
@@ -34,8 +36,10 @@ const PreviewPage = memo((props: PreviewPageProps) => {
     }));
   });
 
+  // NOTE - 1.2 这里获取到pageData的数据
   const [pageData, setPageData] = useState(() => {
-    const pageConfigStr = localStorage.getItem('pageConfig');
+    const pageConfigStr = localStorage.getItem('pageConfig'); // NODE - 1.3 并没有在localstorage找到pageConfig
+
     let pageConfig;
 
     try {
@@ -43,8 +47,12 @@ const PreviewPage = memo((props: PreviewPageProps) => {
     } catch (err) {
       pageConfig = {};
     }
-    return pageConfig;
+    return pageConfig; // NOTE - 1.4 在useState中，传入一个回调函数，其实是起到初始化数据状态的作用，这时候，外层结构出来的pageData就是 pageConfig，然后setPageData可以改变这个数据
   });
+  console.log(
+    '🚀 ~ file: index.tsx ~ line 50 ~ const[pageData,setPageData]=useState ~ pageData',
+    pageData, // NOTE - 1.5 打印出来后是一个空对象（所以目前还不知道这个有什么用）
+  );
 
   const vw = window.innerWidth;
 
@@ -125,6 +133,7 @@ const PreviewPage = memo((props: PreviewPageProps) => {
         }
       >
         <div ref={refImgDom}>
+          {/* NOTE - 1. 这里传入page的数据，<ViewRender />渲染模块 */}
           <ViewRender pageData={pageData} pointData={pointData} width={vw > 800 ? 375 : vw} />
         </div>
       </div>
