@@ -21,15 +21,21 @@ const PreviewPage = memo((props: PreviewPageProps) => {
   // NOTE - 2. 这里操作pointData
   const [pointData, setPointData] = useState(() => {
     const pointDataStr =
-      decodeURI(getQueryString('pointData') ?? '') ?? localStorage.getItem('pointData'); // NOTE - 2.1 从两个地方获取，a、url的字符；b、localStorage中
+      decodeURI(getQueryString('pointData') ?? '') ?? localStorage.getItem('pointData'); // NOTE - 2.2 从两个地方获取，a、url的字符；b、localStorage中
 
+    // NOTE - 2.3 给pointDataStr赋到一个新的变量，不能直接操作pointDataStr
     let points;
-
     try {
       points = JSON.parse(pointDataStr!) || [];
     } catch (err) {
       points = [];
     }
+
+    // NOTE - 2.4 遍历数组对象，返回一个更新后的对象
+    /**
+     * 注意：更新后的对象，被更新了这一个属性：point
+     *  其中，point里面有：isDraggable:false、isResizable:false
+     */
     return points.map((item: PointDataItem) => ({
       ...item,
       point: { ...item.point, isDraggable: false, isResizable: false },
@@ -86,7 +92,7 @@ const PreviewPage = memo((props: PreviewPageProps) => {
         (parent as any)?.(window as unknown).getFaceUrl(url);
       });
     }, 3000);
-  }, [props.location.query]);
+  }, [props.location.query]); // 后面数组有声明对象，说明仅当props.location.query的值发生变化时，useEffect里面的回调才会被执行
 
   const ref = useRef<HTMLDivElement>(null);
   const refImgDom = useRef<HTMLDivElement>(null);
