@@ -21,7 +21,7 @@ const CalendarCp = memo((props: ICalendarConfig & { isTpl: boolean }) => {
     new Date(`${time}-${realRange[1]}`),
   ]);
 
-  // TODO - 6.3 这里会有点疑问... 只拿到一个值,后面是通过哪个函数来进行操作值的变化?
+  // QUESTION - 6.3 这里会有点疑问... 只拿到一个值,后面是通过哪个函数来进行操作值的变化?
   const [min] = useState(new Date(`${time}-01`));
   const [max] = useState(new Date(`${time}-31`));
 
@@ -39,7 +39,6 @@ const CalendarCp = memo((props: ICalendarConfig & { isTpl: boolean }) => {
   }, []);
 
   const isEditorPage = window.location.pathname.indexOf('editor') > -1;
-
   // NOTE 6.6 下面这堆就是按条件渲染, 下面的逻辑比较清晰
   return (
     <>

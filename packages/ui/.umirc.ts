@@ -13,6 +13,8 @@ export default defineConfig({
     disableModelsReExport: true,
     
   },
+  // NOTE -  7. 这里时 umi 配置路由的地方, 声明 /preview 直接就是走向 preview/index.tsx的位置 
+  // (但注意), 实际的路由有非常多的传参 , 接下来则可以看, 当点击 "预览" 这个按钮时候,会发生什么行为的操作
   routes: [
     { path: '/', component: '@/pages/index' },
     { path: '/preview', component: '@/pages/preview/index' },

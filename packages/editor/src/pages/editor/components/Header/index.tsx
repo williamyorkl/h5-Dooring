@@ -46,6 +46,8 @@ const HeaderComponent = memo((props: HeaderComponentProps) => {
 
   const toPreview = () => {
     localStorage.setItem('pointData', JSON.stringify(pointData));
+
+    // NOTE - 7.2 保存"预览"的行为
     savePreview();
     // setTimeout(() => {
     //   window.open(
@@ -55,6 +57,10 @@ const HeaderComponent = memo((props: HeaderComponentProps) => {
     //   );
     // }, 600);
      setTimeout(() => {
+       // NOTE - 7.3 加密pointData参数
+       /**
+        * 注意 !!!这里的域是另一个服务的!!! http://localhost:8008
+        */
       window.open(`http://localhost:8008/preview?tid=${props.location.query.tid}&pointData=${encodeURI(JSON.stringify(pointData))}`);
     }, 600);
   };
@@ -176,8 +182,8 @@ const HeaderComponent = memo((props: HeaderComponentProps) => {
   };
 
   const savePreview = () => {
-    const { tid } = props.location.query || '';
-    req.post('/visible/preview', { tid, tpl: pointData });
+    const { tid } = props.location.query || ''; // NOTE - 7.4 在当前 editor 界面取得 tid
+    req.post('/visible/preview', { tid, tpl: pointData });  // NOTE - 7.5  向后台发送数据, 保存当前用户的 tid 和 pointData
   };
   const handleSaveCode = () => {
     Modal.confirm({
@@ -227,6 +233,7 @@ const HeaderComponent = memo((props: HeaderComponentProps) => {
     (document.getElementById('previewPage') as any).contentWindow.location.reload();
   };
 
+  // TODO - 这里 editor 的逻辑有点乱, 每一个小功能应该解耦出去(然后某几个基础功能在拼装一起)
   return (
     <div className={styles.header}>
       <div className={styles.logoArea}>
@@ -328,6 +335,7 @@ const HeaderComponent = memo((props: HeaderComponentProps) => {
             </Button>
           </Badge>
         </Tooltip>
+        {/* NOTE - 7.1 点击行为的发生 */}
         <Button type="link" onClick={toPreview} disabled={!pointData.length}>
           预览
         </Button>
