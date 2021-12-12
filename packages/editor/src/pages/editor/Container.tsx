@@ -10,8 +10,11 @@ import {
 import { connect } from 'dva';
 import HeaderComponent from './components/Header';
 import CanvasControl from './components/CanvasControl';
-import SourceBox from './TargetBox';
+
+// QUESTION - 8.6 为什么这里要要 SourceBox 和 TargetBox 的导出弄返了?
+import SourceBox from './TargetBox';  
 import TargetBox from './SourceBox';
+
 import Calibration from 'components/Calibration';
 import { FormRender } from '@/core';
 import dooringCompt from 'dooringUI/components';
@@ -49,7 +52,7 @@ const Container = (props: {
   const curPoint = pstate ? pstate.curPoint : {};
 
   // 指定画布的id
-  let canvasId = 'js_canvas';
+  let canvasId = 'js_canvas';  // QUESTION - 8.4.6 canvasId 只是简单声明了一个字符串常量?  (因为貌似在下面也没有看到这个canvasId 有被修改)
 
   const backSize = () => {
     setScale(1);
@@ -137,6 +140,7 @@ const Container = (props: {
     }
   }, [pstate.curPoint]);
 
+  //  获取所有的dray and drop 事件的类型, 仅当 graphTpl, mediaTpl, template 发生变化时候, 才需要重新计算 allType 的变量
   const allType = useMemo(() => {
     let arr: string[] = [];
     template.forEach((v: { type: string }) => {
@@ -416,11 +420,14 @@ const Container = (props: {
           <div className={styles.tickMarkLeft}>
             <Calibration direction="right" id="calibrationRight" multiple={scaleNum} />
           </div>
+
+          {/* NOTE - 8.4.5 由8.6可知, SourceBox 即 TargetBox, 可见 canvasId 是这时候传入的 */}
           <SourceBox
-            dragState={dragstate}
-            setDragState={setDragState}
-            scaleNum={scaleNum}
-            canvasId={canvasId}
+            // NOTE - 8.4.6 关于 SourceBox 的传参问题
+            dragState={dragstate}  // 这里传入了dragstate(初始化为{x:0, y:0}), 其对应方法为 setDragState
+            setDragState={setDragState} // 接着上面, 也把对应操作的方法也传过来了
+            scaleNum={scaleNum}  // 缩放的 scale
+            canvasId={canvasId}  // 貌似全局只有唯一一个 canvasID, "js_canvas"
             allType={allType}
           />
           <CanvasControl scaleNum={scaleNum} handleSlider={handleSlider} backSize={backSize} />

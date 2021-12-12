@@ -38,7 +38,7 @@ const TargetBox = memo((props: SourceBoxProps) => {
   // NOTE - 8.1 由文件名可知, 这个是目标盒子 (画布容器)
   /**
    *        a. isOver: 判断被有没有其他的盒子被拖进来
-   *        b. drop: 这是一个给 ref赋值的对象
+   *        b. drop: 这是一个给 ref赋值的对象, 放在这里看的话, 被放置了 drop 的 div, 里面包裹了 viewRender, 同时 id={canvasId}
    */
   const [{ isOver }, drop] = useDrop({
     // NOTE - 8.2 关于 accept 的类型: 放过来的类型, 只要相符合, 才能被 drop 盒子响应
@@ -60,6 +60,7 @@ const TargetBox = memo((props: SourceBoxProps) => {
         
 
         pointRect = parentDiv!.getBoundingClientRect(),  // 这里如果用可选链的话, 后后面依赖这个参数的 top 的值, 就有可能因为 pointRect 为undefined, 而导致 top 也是undefined ; 但是如果用!的话, 就不会有这个问题 (相当于你告诉 ts, 这个类型一定不会为空, 一定是有值的)
+
         top = pointRect.top,
         pointEnd = monitor.getSourceClientOffset(),
         y = pointEnd!.y < top ? 0 : pointEnd!.y - top,
@@ -83,6 +84,8 @@ const TargetBox = memo((props: SourceBoxProps) => {
         },
       });
     },
+
+    // collect 函数返回的对象会赋给 useDrop 的第一个参数 collectProps，可以在组件中直接进行使用 (即在该文件:43行处的第一个参数, 可以获取到 collect 返回的对象)
     collect: monitor => ({
       isOver: monitor.isOver(),
       canDrop: monitor.canDrop(),
@@ -155,7 +158,8 @@ const TargetBox = memo((props: SourceBoxProps) => {
     ),
     [onConTextClick],
   );
-
+  
+  // NOTE - 8.4.1 仅当 canvasId 发生变化时, 才会执行 useEffect 内的函数 (类似 vue 的 watch 的操作)
   useEffect(() => {
     let { width, height } = document.getElementById(canvasId)!.getBoundingClientRect();
     setCanvasRect([width, height]);
@@ -181,6 +185,7 @@ const TargetBox = memo((props: SourceBoxProps) => {
         }}
       >
         <div className={styles.canvasBox}>
+          {/* 这里用到了 react-contextify, 用于控制 div 列的操作 (右击小菜单) */}
           <MenuProvider id="menu_id">
             <div
               style={{
@@ -190,6 +195,10 @@ const TargetBox = memo((props: SourceBoxProps) => {
                 height: '100%',
               }}
             >
+              {/* NOTE - 8.4.2 canvasId 作为当前 "drop"盒子的 div 的ID
+              *           - 意味着以下的 div 是一个"被放下"的盒子
+              *           - 另外可以注意到, opacity 这个属性, 是根据 "isOver" 判断的, 即当有其他的 div 悬浮的时候, 其背景为 "半透明"
+              */}
               <div
                 id={canvasId}
                 className={styles.canvas}
@@ -199,6 +208,12 @@ const TargetBox = memo((props: SourceBoxProps) => {
                 ref={drop}
               >
                 {pointData.length > 0 ? (
+                  /**
+                   * // NOTE - 8.4.3 这里关于 Suspense
+                   *    - fallback: 被理解为 "回退", 即处理错误状态时, 应该渲染什么
+                   *    - 被 Suspense 包裹的组件, 不需要考虑数据没回来, 应该怎样处理显示; 视图回来后, 直接渲染即可
+                   *    - 这里用 Suspense 的原因是 <ViewRender /> 是一个 react.lazy 的异步组件
+                   */
                   <React.Suspense fallback="loading">
                     <ViewRender
                       pointData={pointData}
@@ -216,7 +231,7 @@ const TargetBox = memo((props: SourceBoxProps) => {
       </Draggable>
     );
   }, [
-    canvasId,
+    canvasId,  // NOTE - 8.4.4 仅当当前数据里面的值发生变化后, 才会去重复渲染被 useMemo 包裹起来的组件(性能优化)
     canvasRect,
     dragState,
     dragStop,
@@ -238,6 +253,7 @@ const TargetBox = memo((props: SourceBoxProps) => {
   );
 });
 
+// NOTE - 8.5 这里注册了 redux
 export default connect((state: StateWithHistory<any>) => ({
   pstate: state.present.editorModal,
   cstate: state.present.editorPcModal,
